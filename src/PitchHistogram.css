@@ -1,0 +1,73 @@
+.pitch-histogram {
+  width: 800px;  /* Match piano visualizer width */
+  margin: 20px auto 0;
+  padding: 0;
+}
+
+.histogram-svg-container {
+  width: 100%;
+  height: 250px;
+  overflow: hidden;
+}
+
+.pitch-histogram h3 {
+  margin: 0 0 15px 0;
+  font-size: 1.1rem;
+  color: #ffffff;
+  text-align: center;
+  font-weight: 500;
+}
+
+.pitch-histogram svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.pitch-histogram .grid line {
+  stroke: rgba(255, 255, 255, 0.1);
+}
+
+.pitch-histogram .grid path {
+  stroke-width: 0;
+}
+
+.pitch-histogram .x-axis,
+.pitch-histogram .y-axis {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.pitch-histogram .x-axis line,
+.pitch-histogram .y-axis line {
+  stroke: rgba(255, 255, 255, 0.3);
+}
+
+.pitch-histogram .x-axis path,
+.pitch-histogram .y-axis path {
+  stroke: rgba(255, 255, 255, 0.3);
+}
+
+.pitch-histogram text {
+  font-size: 12px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  fill: rgba(255, 255, 255, 0.7);
+}
+
+.pitch-histogram .note-label {
+  font-size: 10px;
+  fill: rgba(255, 255, 255, 0.7);
+}
+
+.pitch-histogram .note-label.primary {
+  font-weight: bold;
+  font-size: 11px;
+}
+
+.pitch-histogram .note-label.secondary {
+  font-size: 9px;
+  fill: rgba(255, 255, 255, 0.4);
+}
+
+.pitch-histogram .x-axis text {
+  font-size: 10px;
+} 

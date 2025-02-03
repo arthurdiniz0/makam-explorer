@@ -1,0 +1,397 @@
+body {
+  background-color: #1a1a1a;
+  color: #ffffff;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.App {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.App-header {
+  text-align: center;
+  padding: 20px;
+}
+
+h1 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+audio {
+  margin-top: 20px;
+}
+
+.visualization-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 40px; /* Increase spacing between elements */
+  margin-top: 20px;
+}
+
+.pitch-chart-container {
+  flex: 3;
+}
+
+.note-ball-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Main controls section */
+.controls {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 2rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.select-group {
+  display: flex;
+  gap: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.select-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.select-container label {
+  font-size: 0.9rem;
+  color: #999;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.select-container select {
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.select-container select:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.select-container select:focus {
+  outline: none;
+  border-color: #4a9eff;
+  box-shadow: 0 0 0 2px rgba(74, 158, 255, 0.2);
+}
+
+.select-container select:disabled {
+  background-color: rgba(255, 255, 255, 0.02);
+  color: #666;
+  cursor: not-allowed;
+}
+
+/* Visualization section */
+.visualization {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.visualization-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.controls-row {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-end;
+  width: 100%;
+}
+
+.controls-row-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.controls-row audio {
+  width: 100%;
+  margin: 0;
+  border-radius: 8px;
+}
+
+/* Speed Control */
+.speed-control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.speed-control-input {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.speed-control input[type="range"] {
+  flex: 1;
+  height: 4px;
+  -webkit-appearance: none;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  outline: none;
+}
+
+.speed-value {
+  font-size: 0.9rem;
+  color: #4a9eff;
+  font-weight: 500;
+  min-width: 3em;
+  text-align: right;
+}
+
+/* Pitch Method Select */
+.pitch-method-select {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Common label styles */
+.speed-control label,
+.pitch-method-select label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+
+/* Common select styles */
+.pitch-method-select select {
+  background-color: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.9rem;
+  padding: 0.75rem;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pitch-method-select select:hover:not(:disabled) {
+  background-color: rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.pitch-method-select select:focus {
+  outline: none;
+  border-color: #4a9eff;
+  box-shadow: 0 0 0 2px rgba(74, 158, 255, 0.2);
+}
+
+/* Piano visualizer container */
+.visualization-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  background: #1a1a1a;
+  border-radius: 12px;
+  margin-top: 20px;
+  align-items: center;
+}
+
+.histogram-container {
+  width: 800px;  /* Match piano visualizer width */
+  margin-top: 20px;
+}
+
+/* Style the audio player */
+audio::-webkit-media-controls-panel {
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+}
+
+audio::-webkit-media-controls-current-time-display,
+audio::-webkit-media-controls-time-remaining-display,
+audio::-webkit-media-controls-duration-display {
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+audio::-webkit-media-controls-play-button,
+audio::-webkit-media-controls-mute-button {
+  filter: invert(1);
+}
+
+audio::-webkit-media-controls-timeline {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  height: 4px;
+}
+
+audio::-webkit-media-controls-volume-slider {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  height: 4px;
+}
+
+/* Piano visualizer specific styles */
+.piano-visualizer {
+  width: 800px;
+  height: 300px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.pitch-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 800px;
+  height: 300px;
+  z-index: 1;
+}
+
+.piano {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 120px;
+  display: flex;
+  z-index: 2;
+}
+
+.piano-key {
+  flex: 1;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  position: relative;
+  transition: all 0.1s ease;
+  user-select: none;
+  cursor: pointer;
+}
+
+.piano-key.white {
+  background-color: #fff;
+  height: 100%;
+  z-index: 1;
+}
+
+.piano-key.black {
+  background-color: #222;
+  height: 65%;
+  margin: 0 -1.5%;
+  z-index: 2;
+  border-radius: 0 0 4px 4px;
+}
+
+.piano-key.active {
+  background-color: #ffd700 !important;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+.piano-key .label {
+  font-size: 10px;
+  position: absolute;
+  bottom: 5px;
+  color: #666;
+  font-weight: 500;
+}
+
+.piano-key.black .label {
+  color: #fff;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .App {
+    padding: 1rem;
+  }
+  
+  .visualization {
+    padding: 1rem;
+  }
+  
+  .piano-visualizer,
+  .visualization audio {
+    width: 100%;
+    max-width: 800px;
+  }
+}
+
+.info-button {
+  background: #4a9eff;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  align-self: flex-end;
+  margin-bottom: 6px;
+  position: relative;
+}
+
+.info-button:hover {
+  background: #6ab0ff;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.info-button:active {
+  transform: translateY(0);
+  box-shadow: none;
+}

@@ -1,0 +1,68 @@
+/* PianoVisualizer.css */
+.piano-visualizer {
+    position: relative;
+    width: 800px;
+    height: 300px; /* matches canvas */
+    margin: 0 auto;
+    background: #222;
+  }
+  
+  .pitch-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 800px;
+    height: 300px;
+    z-index: 1;
+    background-color: transparent;
+  }
+  
+  .piano {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 800px;
+    height: 100px; /* same as the code's pianoHeight */
+    display: flex;
+    z-index: 2;
+    box-sizing: border-box;
+  }
+  
+  .piano-key {
+    flex: 1;
+    border: 1px solid #333;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    position: relative;
+    transition: background-color 0.1s;
+    user-select: none;
+    cursor: pointer;
+  }
+  
+  .piano-key.white {
+    background-color: #fff;
+    height: 100%;
+  }
+  
+  .piano-key.black {
+    background-color: #000;
+    color: #fff;
+    height: 60%;
+    margin: 0 -1.5%;
+    z-index: 3; 
+  }
+  
+  .piano-key.active {
+    background-color: yellow !important;
+    box-shadow: 0 0 10px yellow;
+  }
+  
+  .label {
+    font-size: 10px;
+    position: absolute;
+    bottom: 5px;
+    pointer-events: none;
+    color: #333;
+  }
+  
