@@ -59,3 +59,9 @@ wheels/
 # Data files
 *.csv
 *.pickle
+
+# Large data files
+/public/subsetRecordings/**/*.json
+/public/subsetRecordings/subset_recordings_pickle/
+*.h.jpeg
+*.p.jpeg

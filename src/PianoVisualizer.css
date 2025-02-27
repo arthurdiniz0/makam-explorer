@@ -59,10 +59,393 @@
   }
   
   .label {
-    font-size: 10px;
+    font-size: 14px;
     position: absolute;
-    bottom: 5px;
+    bottom: 10px;
     pointer-events: none;
-    color: #333;
+    color: #666;
+    font-family: monospace;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  
+  .piano-key.black .label {
+    color: rgba(255, 255, 255, 0.8);
+  }
+  
+  .piano-key.unmapped {
+    opacity: 0.6;
+  }
+  
+  .piano-key.mapped {
+    opacity: 1;
+  }
+  
+  /* Remove all special borders by default */
+  .piano-key.sharp,
+  .piano-key.flat,
+  .piano-key.shifted {
+    border: 1px solid #333;
+  }
+  
+  /* Apply blue border only to peak-matched keys */
+  .piano-key.peak-match {
+    border: 2px solid #4a9eff !important;
+  }
+  
+  /* Remove dot indicators */
+  .piano-key.peak-match::after,
+  .piano-key.black.peak-match::after {
+    display: none;
+  }
+  
+  .piano-controls {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 3;
+  }
+  
+  .tuning-toggle {
+    padding: 8px 16px;
+    background: #2a2a2a;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+  }
+  
+  .tuning-toggle:hover {
+    background: #3a3a3a;
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .tuning-toggle:focus {
+    outline: none;
+    border-color: #4a9eff;
+    box-shadow: 0 0 0 2px rgba(74, 158, 255, 0.2);
+  }
+  
+  .tuning-toggle.active {
+    background: #4a9eff;
+    border-color: #4a9eff;
+  }
+  
+  /* Tuning Info Panel */
+  .tuning-info {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .tuning-info h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 500;
+  }
+  
+  .peak-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 15px;
+  }
+  
+  .peak-item {
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 12px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .peak-item-header {
+    font-weight: 500;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: #4a9eff;
+  }
+  
+  .peak-item-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .tuning-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9em;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .tuning-label {
+    color: rgba(255, 255, 255, 0.6);
+  }
+  
+  .tuning-value {
+    font-family: monospace;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .tuning-value.sharp {
+    color: #ff4444;
+  }
+  
+  .tuning-value.flat {
+    color: #4444ff;
+  }
+  
+  .peak-item.unmapped {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.5);
+    font-style: italic;
+  }
+  
+  /* Add custom scrollbar styling */
+  .tuning-info::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .tuning-info::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+  }
+  
+  .tuning-info::-webkit-scrollbar-thumb {
+    background: rgba(74, 158, 255, 0.5);
+    border-radius: 4px;
+  }
+  
+  .tuning-info::-webkit-scrollbar-thumb:hover {
+    background: rgba(74, 158, 255, 0.7);
+  }
+  
+  .tuning-info h4 {
+    margin: 0 0 10px 0;
+    font-size: 1rem;
+    color: white;
+  }
+  
+  .info-section {
+    margin-bottom: 20px;
+  }
+  
+  .key-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .key-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 6px 10px;
+    border-radius: 4px;
+  }
+  
+  .key-label {
+    font-family: monospace;
+    font-size: 1.1rem;
+    color: #4a9eff;
+    font-weight: 600;
+  }
+  
+  .key-info {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+  }
+  
+  .key-diff {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.85rem;
+  }
+  
+  .shift-amount {
+    background: rgba(74, 158, 255, 0.1);
+    padding: 8px;
+    border-radius: 4px;
+    margin: 10px 0;
+    text-align: center;
+    color: #4a9eff;
+    font-weight: 500;
+  }
+  
+  .legend-color {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    background: #fff;
+  }
+  
+  .legend-direct {
+    border: 2px solid #4a9eff;
+  }
+  
+  .legend-shifted {
+    border: 1px dashed #4a9eff;
+  }
+  
+  .direct-mappings {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 8px;
+    margin-top: 10px;
+    font-size: 0.85rem;
+  }
+  
+  .direct-mappings .note {
+    color: #4a9eff;
+    font-weight: 500;
+  }
+  
+  .direct-mappings .cents {
+    text-align: right;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .shift-value {
+    display: block;
+    text-align: center;
+    font-size: 1.2rem;
+    color: #4a9eff;
+    font-weight: 500;
+    margin: 10px 0;
+  }
+  
+  .shift-label {
+    text-align: center;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-style: italic;
+  }
+  
+  .piano-visualizer-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+  }
+  
+  .piano-visualizer-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    width: 800px;
+    margin: 0 auto 1rem;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .instrument-selector {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+    max-width: 400px;
+  }
+  
+  .instrument-selector label {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  
+  .instrument-selector select {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    background: #2a2a2a;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 160px;
+  }
+  
+  .tuning-toggle {
+    padding: 0.75rem 1.5rem;
+    background: #2a2a2a;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 160px;
+    white-space: nowrap;
+  }
+  
+  /* Style for both buttons in the controls */
+  .piano-visualizer-controls button {
+    background: #2a2a2a;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+  }
+  
+  .piano-visualizer-controls button:hover {
+    background: #3a3a3a;
+  }
+  
+  .piano-visualizer-controls button.active {
+    background: #4a9eff;
+    border-color: #4a9eff;
+  }
+  
+  /* Instrument selector specific styles */
+  .piano-visualizer-controls .instrument-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .piano-visualizer-controls .instrument-selector select {
+    padding: 8px 12px;
+    border-radius: 4px;
+    background: #2a2a2a;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 14px;
+    cursor: pointer;
+    min-width: 200px;
+  }
+  
+  .piano-visualizer-controls .instrument-selector select:hover {
+    background: #3a3a3a;
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .piano-visualizer-controls .instrument-selector select:focus {
+    outline: none;
+    border-color: #4a9eff;
+    box-shadow: 0 0 0 2px rgba(74, 158, 255, 0.2);
+  }
+  
+  .piano-visualizer-controls .loading-text {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 12px;
+    font-style: italic;
   }
   
