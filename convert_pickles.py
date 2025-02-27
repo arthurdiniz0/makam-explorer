@@ -51,13 +51,32 @@ def process_directory(base_dir):
                 if key in data:
                     converted_data[key] = convert_numpy_to_list(data[key])
             
+            # Process method-specific histogram values
+            for method in ['pyin', 'makam', 'crepe']:
+                key = f'pitch_hist_values_{method}'
+                if key in data:
+                    converted_data[key] = convert_numpy_to_list(data[key])
+                elif 'pitch_hist_values' in data and method == 'pyin':  # Default to pyin for backward compatibility
+                    converted_data[key] = convert_numpy_to_list(data['pitch_hist_values'])
+            
+            # Process keyboard mapping data
+            for key in ['mapped_key_freqs_hz', 'mapped_key_freqs_cent']:
+                if key in data:
+                    converted_data[key] = convert_numpy_to_list(data[key])
+            
             # Process any other data that might be present
             for key in data:
                 if key not in converted_data and key not in ['pitch_pyin', 'pitch_makam', 'pitch_crepe']:
                     converted_data[key] = convert_numpy_to_list(data[key])
             
-            # Save as JSON
-            json_path = pickle_path.with_suffix('.json')
+            # Save as JSON in the parent directory
+            relative_path = pickle_path.relative_to(base_path)
+            parent_dir = base_path.parent
+            json_path = parent_dir / relative_path.with_suffix('.json')
+            
+            # Create parent directories if they don't exist
+            json_path.parent.mkdir(parents=True, exist_ok=True)
+            
             with open(json_path, 'w') as f:
                 json.dump(converted_data, f)
             
@@ -68,4 +87,4 @@ def process_directory(base_dir):
             print(f"Error processing {pickle_path}: {e}")
 
 if __name__ == "__main__":
-    process_directory("public/subsetRecordings") 
+    process_directory("public/subsetRecordings/subset_recordings_pickle") 

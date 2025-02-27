@@ -352,6 +352,29 @@ audio::-webkit-media-controls-volume-slider {
   color: #fff;
 }
 
+.piano-key.mapped {
+  border: 2px solid #4a9eff;
+}
+
+.piano-key.unmapped {
+  opacity: 0.5;
+}
+
+.piano-key .mapped-freq {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: #4a9eff;
+  white-space: nowrap;
+}
+
+.piano-key.black .mapped-freq {
+  color: #fff;
+  bottom: -25px;
+}
+
 /* Responsive adjustments */
 @media (max-width: 1200px) {
   .App {
@@ -394,4 +417,76 @@ audio::-webkit-media-controls-volume-slider {
 .info-button:active {
   transform: translateY(0);
   box-shadow: none;
+}
+
+.piano-controls {
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px;
+}
+
+.tuning-toggle {
+  background: #4a9eff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tuning-toggle:hover {
+  background: #6ab0ff;
+}
+
+.tuning-toggle.active {
+  background: #2a7edf;
+}
+
+.piano-key .cent-diff {
+  position: absolute;
+  bottom: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: #666;
+  white-space: nowrap;
+}
+
+.piano-key.black .cent-diff {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.piano-key .cent-diff.sharp {
+  color: #ff4444;
+}
+
+.piano-key .cent-diff.flat {
+  color: #4444ff;
+}
+
+.piano-key .detune-indicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 4px;
+  opacity: 0.5;
+  transition: height 0.3s ease;
+}
+
+.piano-key.white .detune-indicator {
+  height: 100%;
+}
+
+.piano-key.black .detune-indicator {
+  height: 65%;
+}
+
+.piano-key.sharp {
+  border-left: 2px solid #ff4444;
+}
+
+.piano-key.flat {
+  border-left: 2px solid #4444ff;
 }

@@ -1,0 +1,136 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.tuning-modal {
+  width: 400px;
+  max-height: 80vh;
+  background: #1a1a1a;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+  transform-origin: top left;
+  animation: modal-open 0.2s ease-out;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #fff;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.close-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.tuning-modal .modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.tuning-modal .peak-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.tuning-modal .peak-item {
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 12px;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tuning-modal .peak-item-header {
+  font-weight: 500;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: #4a9eff;
+}
+
+.tuning-modal .peak-item-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tuning-modal .tuning-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9em;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.tuning-modal .tuning-label {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.tuning-modal .tuning-value {
+  font-family: monospace;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.tuning-modal .tuning-value.sharp {
+  color: #ff4444;
+}
+
+.tuning-modal .tuning-value.flat {
+  color: #4444ff;
+}
+
+.peak-match-indicator {
+  color: #ffd700;
+  margin-left: 8px;
+  font-size: 0.9em;
+}
+
+@keyframes modal-open {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+} 

@@ -98,7 +98,17 @@ function App() {
                 pitch_hist_values: data.pitch_hist_values,
                 pitch_hist_edges: data.pitch_hist_edges,
                 pitch_hist_values_mean: data.pitch_hist_values_mean,
-                pitch_hist_values_method: data[`pitch_hist_values_${firstMethod.split('_')[1]}`] || data.pitch_hist_values
+                pitch_hist_values_pyin: data.pitch_hist_values_pyin || data.pitch_hist_values,
+                pitch_hist_values_crepe: data.pitch_hist_values_crepe,
+                pitch_hist_values_makam: data.pitch_hist_values_makam,
+                maxima_locs_cent: data.maxima_locs_cent
+              });
+
+              console.log('Setting pitch data with histogram values:', {
+                pyin: data.pitch_hist_values_pyin?.length || data.pitch_hist_values?.length,
+                crepe: data.pitch_hist_values_crepe?.length,
+                makam: data.pitch_hist_values_makam?.length,
+                mean: data.pitch_hist_values_mean?.length
               });
             }
           })
@@ -128,11 +138,20 @@ function App() {
         fetch(`/subsetRecordings/${recording.cd}/${recording.title}.json`)
           .then(response => response.json())
           .then(data => {
+            console.log('Loaded data:', data);
+            console.log('Maxima locations from JSON:', data.maxima_locs_cent);
+            
             // Transform the pitch data
             const formattedPitchData = data[selectedPitchMethod].map(([time, frequency]) => ({
               time,
               frequency
             }));
+
+            // Log the data we're about to set
+            console.log('Setting pitch data:', {
+              pitchPoints: formattedPitchData.slice(0, 2),
+              maxima_locs_cent: data.maxima_locs_cent
+            });
 
             // Store pitch data and histogram data
             setPitchData({
@@ -140,8 +159,17 @@ function App() {
               pitch_hist_values: data.pitch_hist_values,
               pitch_hist_edges: data.pitch_hist_edges,
               pitch_hist_values_mean: data.pitch_hist_values_mean,
-              // Add method-specific histogram if available
-              pitch_hist_values_method: data[`pitch_hist_values_${selectedPitchMethod.split('_')[1]}`] || data.pitch_hist_values
+              pitch_hist_values_pyin: data.pitch_hist_values_pyin || data.pitch_hist_values,
+              pitch_hist_values_crepe: data.pitch_hist_values_crepe,
+              pitch_hist_values_makam: data.pitch_hist_values_makam,
+              maxima_locs_cent: data.maxima_locs_cent
+            });
+
+            console.log('Setting pitch data with histogram values:', {
+              pyin: data.pitch_hist_values_pyin?.length || data.pitch_hist_values?.length,
+              crepe: data.pitch_hist_values_crepe?.length,
+              makam: data.pitch_hist_values_makam?.length,
+              mean: data.pitch_hist_values_mean?.length
             });
           })
           .catch(error => {
@@ -269,9 +297,16 @@ function App() {
           </div>
           <div className="visualization-content">
             <PianoVisualizer 
-              pitchData={pitchData.pitchPoints} 
+              pitchData={{
+                pitchPoints: pitchData.pitchPoints,
+                pitch_hist_values: pitchData.pitch_hist_values,
+                pitch_hist_edges: pitchData.pitch_hist_edges,
+                pitch_hist_values_mean: pitchData.pitch_hist_values_mean,
+                maxima_locs_cent: pitchData.maxima_locs_cent
+              }}
               audioRef={audioRef} 
               playbackSpeed={playbackSpeed}
+              maximaLocsCent={pitchData.maxima_locs_cent}
             />
             <div className="histogram-container">
               <PitchHistogram pitchData={pitchData} />
