@@ -2,27 +2,32 @@ import os
 import json
 import pickle
 import numpy as np
+import argparse
 from pathlib import Path
 
 def convert_numpy_to_list(obj):
     if isinstance(obj, np.ndarray):
         return obj.tolist()
-    elif isinstance(obj, np.float32) or isinstance(obj, np.float64):
-        # Handle NaN values
+    elif isinstance(obj, (np.float32, np.float64, np.int32, np.int64)):
+        # Handle NaN values and numpy number types
         if np.isnan(obj):
             return None
-        return float(obj)
+        return float(obj) if isinstance(obj, (np.float32, np.float64)) else int(obj)
     elif isinstance(obj, dict):
         return {k: convert_numpy_to_list(v) for k, v in obj.items()}
     elif isinstance(obj, list):
         return [convert_numpy_to_list(item) for item in obj]
     return obj
 
-def process_directory(base_dir):
-    base_path = Path(base_dir)
+def process_directory(input_dir, output_dir):
+    input_path = Path(input_dir)
+    output_path = Path(output_dir)
+    
+    # Create output directory if it doesn't exist
+    output_path.mkdir(parents=True, exist_ok=True)
     
     # Find all pickle files
-    pickle_files = list(base_path.rglob("*.pickle"))
+    pickle_files = list(input_path.rglob("*.pickle"))
     print(f"Found {len(pickle_files)} pickle files")
     
     for pickle_path in pickle_files:
@@ -46,8 +51,8 @@ def process_directory(base_dir):
                             pitch_data.append([float(t), float(f)])
                     converted_data[method] = pitch_data
             
-            # Process histogram data
-            for key in ['pitch_hist_values', 'pitch_hist_edges', 'pitch_hist_values_mean']:
+            # Process histogram data - add the new oct_warped_hist_mean_wrt_tonic
+            for key in ['pitch_hist_values', 'pitch_hist_edges', 'pitch_hist_values_mean', 'oct_warped_hist_mean_wrt_tonic']:
                 if key in data:
                     converted_data[key] = convert_numpy_to_list(data[key])
             
@@ -69,10 +74,9 @@ def process_directory(base_dir):
                 if key not in converted_data and key not in ['pitch_pyin', 'pitch_makam', 'pitch_crepe']:
                     converted_data[key] = convert_numpy_to_list(data[key])
             
-            # Save as JSON in the parent directory
-            relative_path = pickle_path.relative_to(base_path)
-            parent_dir = base_path.parent
-            json_path = parent_dir / relative_path.with_suffix('.json')
+            # Preserve relative directory structure
+            relative_path = pickle_path.relative_to(input_path)
+            json_path = output_path / relative_path.with_suffix('.json')
             
             # Create parent directories if they don't exist
             json_path.parent.mkdir(parents=True, exist_ok=True)
@@ -87,4 +91,13 @@ def process_directory(base_dir):
             print(f"Error processing {pickle_path}: {e}")
 
 if __name__ == "__main__":
-    process_directory("public/subsetRecordings/subset_recordings_pickle") 
+    parser = argparse.ArgumentParser(description='Convert pickle files to JSON for Makam Explorer')
+    parser.add_argument('--input_dir', type=str, default="public/subsetRecordings/subset_recordings_pickle",
+                        help='Input directory containing pickle files')
+    parser.add_argument('--output_dir', type=str, default="public/pitch_data",
+                        help='Output directory for JSON files')
+    
+    args = parser.parse_args()
+    
+    print(f"Processing files from {args.input_dir} to {args.output_dir}")
+    process_directory(args.input_dir, args.output_dir) 
