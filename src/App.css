@@ -1,6 +1,6 @@
 body {
-  background-color: #1a1a1a;
-  color: #ffffff;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   margin: 0;
   padding: 0;
@@ -18,6 +18,37 @@ body {
   display: flex;
   flex-direction: column;
   gap: 2rem;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 24px;
+  color: var(--text-primary);
+}
+
+.map-link {
+  padding: 8px 16px;
+  background-color: rgba(74, 158, 255, 0.2);
+  color: var(--primary-blue);
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: background-color 0.2s, transform 0.1s;
+  border: 1px solid rgba(74, 158, 255, 0.3);
+}
+
+.map-link:hover {
+  background-color: rgba(74, 158, 255, 0.3);
+  transform: translateY(-1px);
 }
 
 .App-header {
@@ -56,11 +87,11 @@ audio {
 
 /* Main controls section */
 .controls {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--bg-card);
   border-radius: 12px;
   padding: 2rem;
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-light);
 }
 
 .select-group {
@@ -79,7 +110,7 @@ audio {
 
 .select-container label {
   font-size: 0.9rem;
-  color: #999;
+  color: var(--text-tertiary);
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -88,41 +119,42 @@ audio {
 .select-container select {
   padding: 0.75rem;
   font-size: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-light);
   border-radius: 8px;
-  background-color: rgba(255, 255, 255, 0.05);
-  color: #fff;
+  background-color: var(--bg-card);
+  color: var(--text-primary);
   width: 100%;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .select-container select:hover:not(:disabled) {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--bg-card-hover);
 }
 
 .select-container select:focus {
   outline: none;
-  border-color: #4a9eff;
+  border-color: var(--primary-blue);
   box-shadow: 0 0 0 2px rgba(74, 158, 255, 0.2);
 }
 
 .select-container select:disabled {
-  background-color: rgba(255, 255, 255, 0.02);
-  color: #666;
+  background-color: var(--bg-card);
+  color: var(--text-tertiary);
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
 /* Visualization section */
 .visualization {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--bg-card);
   border-radius: 12px;
   padding: 2rem;
   display: flex;
   flex-direction: column;
   gap: 2rem;
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-light);
 }
 
 .visualization-controls {
@@ -130,7 +162,7 @@ audio {
   flex-direction: column;
   gap: 1.5rem;
   padding-bottom: 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .controls-row {
@@ -156,52 +188,52 @@ audio {
 .speed-control {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  background: rgba(0, 0, 0, 0.2);
-  padding: 1rem;
+  gap: 0.5rem;
+  background: var(--bg-card);
+  padding: 0.75rem;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-light);
 }
 
 .speed-control-input {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .speed-control input[type="range"] {
   flex: 1;
-  height: 4px;
+  height: 3px;
   -webkit-appearance: none;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.1);
   border-radius: 2px;
   outline: none;
 }
 
 .speed-value {
-  font-size: 0.9rem;
-  color: #4a9eff;
+  font-size: 0.8rem;
+  color: var(--primary-blue);
   font-weight: 500;
-  min-width: 3em;
+  min-width: 2.5em;
   text-align: right;
 }
 
 /* Pitch Method Select */
 .pitch-method-select {
-  background: rgba(0, 0, 0, 0.2);
-  padding: 1rem;
+  background: var(--bg-card);
+  padding: 0.75rem;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-light);
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 /* Common label styles */
 .speed-control label,
 .pitch-method-select label {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 500;
@@ -209,25 +241,23 @@ audio {
 
 /* Common select styles */
 .pitch-method-select select {
-  background-color: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-light);
   border-radius: 6px;
-  color: #fff;
-  font-size: 0.9rem;
-  padding: 0.75rem;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  padding: 0.5rem 0.75rem;
   width: 100%;
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
 .pitch-method-select select:hover:not(:disabled) {
-  background-color: rgba(0, 0, 0, 0.3);
-  border-color: rgba(255, 255, 255, 0.2);
+  background-color: var(--bg-card-hover);
 }
 
 .pitch-method-select select:focus {
   outline: none;
-  border-color: #4a9eff;
+  border-color: var(--primary-blue);
   box-shadow: 0 0 0 2px rgba(74, 158, 255, 0.2);
 }
 
@@ -235,59 +265,94 @@ audio {
 .visualization-content {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 15px;
   padding: 20px;
-  background: #1a1a1a;
+  background: var(--bg-secondary);
   border-radius: 12px;
   margin-top: 20px;
   align-items: center;
+  border: 1px solid var(--border-light);
 }
 
-.histogram-container {
-  width: 800px;  /* Match piano visualizer width */
-  margin-top: 20px;
+/* Combined player and controls container */
+.player-controls-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 800px;
+  background: var(--bg-tertiary);
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: var(--shadow-light);
+  border: 1px solid var(--border-light);
+}
+
+/* Audio player styling */
+.audio-player {
+  width: 100%;
+  border-radius: 8px;
+  background-color: var(--bg-tertiary);
+  margin: 0;
+  height: 44px;
+}
+
+/* Playback controls container */
+.playback-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
 }
 
 /* Style the audio player */
 audio::-webkit-media-controls-panel {
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: var(--bg-card);
   border-radius: 8px;
+  padding: 6px 10px;
 }
 
 audio::-webkit-media-controls-current-time-display,
 audio::-webkit-media-controls-time-remaining-display,
 audio::-webkit-media-controls-duration-display {
-  color: #ffffff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  color: rgba(0, 0, 0, 0.8);
+  text-shadow: none;
   font-size: 13px;
   font-weight: 500;
+  margin: 0 4px;
 }
 
 audio::-webkit-media-controls-play-button,
 audio::-webkit-media-controls-mute-button {
-  filter: invert(1);
+  filter: invert(0.3);
+}
+
+audio::-webkit-media-controls-play-button:hover,
+audio::-webkit-media-controls-mute-button:hover {
+  filter: invert(0.5);
 }
 
 audio::-webkit-media-controls-timeline {
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
   height: 4px;
+  margin: 0 10px;
 }
 
 audio::-webkit-media-controls-volume-slider {
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
   height: 4px;
+  margin: 0 10px;
 }
 
 /* Piano visualizer specific styles */
 .piano-visualizer {
   width: 800px;
   height: 300px;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--bg-tertiary);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-light);
 }
 
 .pitch-canvas {
@@ -322,13 +387,13 @@ audio::-webkit-media-controls-volume-slider {
 }
 
 .piano-key.white {
-  background-color: #fff;
+  background-color: var(--piano-white-key);
   height: 100%;
   z-index: 1;
 }
 
 .piano-key.black {
-  background-color: #222;
+  background-color: var(--piano-black-key);
   height: 65%;
   margin: 0 -1.5%;
   z-index: 2;
@@ -336,24 +401,24 @@ audio::-webkit-media-controls-volume-slider {
 }
 
 .piano-key.active {
-  background-color: #ffd700 !important;
-  box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+  background-color: var(--piano-key-active) !important;
+  box-shadow: 0 0 20px var(--piano-key-glow);
 }
 
 .piano-key .label {
   font-size: 10px;
   position: absolute;
   bottom: 5px;
-  color: #666;
+  color: var(--text-tertiary);
   font-weight: 500;
 }
 
 .piano-key.black .label {
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .piano-key.mapped {
-  border: 2px solid #4a9eff;
+  border: 2px solid var(--primary-blue);
 }
 
 .piano-key.unmapped {
@@ -366,12 +431,12 @@ audio::-webkit-media-controls-volume-slider {
   left: 50%;
   transform: translateX(-50%);
   font-size: 10px;
-  color: #4a9eff;
+  color: var(--primary-blue);
   white-space: nowrap;
 }
 
 .piano-key.black .mapped-freq {
-  color: #fff;
+  color: var(--text-primary);
   bottom: -25px;
 }
 
@@ -386,15 +451,21 @@ audio::-webkit-media-controls-volume-slider {
   }
   
   .piano-visualizer,
-  .visualization audio {
+  .audio-player,
+  .player-controls-container,
+  .histogram-container {
     width: 100%;
     max-width: 800px;
+  }
+  
+  .playback-controls {
+    grid-template-columns: 1fr;
   }
 }
 
 .info-button {
-  background: #4a9eff;
-  color: white;
+  background: var(--primary-blue);
+  color: var(--text-primary);
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
@@ -409,9 +480,9 @@ audio::-webkit-media-controls-volume-slider {
 }
 
 .info-button:hover {
-  background: #6ab0ff;
+  background: var(--primary-blue-hover);
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-light);
 }
 
 .info-button:active {
@@ -426,8 +497,8 @@ audio::-webkit-media-controls-volume-slider {
 }
 
 .tuning-toggle {
-  background: #4a9eff;
-  color: white;
+  background: var(--primary-blue);
+  color: var(--text-primary);
   border: none;
   padding: 8px 16px;
   border-radius: 6px;
@@ -437,11 +508,11 @@ audio::-webkit-media-controls-volume-slider {
 }
 
 .tuning-toggle:hover {
-  background: #6ab0ff;
+  background: var(--primary-blue-hover);
 }
 
 .tuning-toggle.active {
-  background: #2a7edf;
+  background: var(--primary-blue-hover);
 }
 
 .piano-key .cent-diff {
@@ -450,20 +521,20 @@ audio::-webkit-media-controls-volume-slider {
   left: 50%;
   transform: translateX(-50%);
   font-size: 10px;
-  color: #666;
+  color: var(--text-tertiary);
   white-space: nowrap;
 }
 
 .piano-key.black .cent-diff {
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--text-secondary);
 }
 
 .piano-key .cent-diff.sharp {
-  color: #ff4444;
+  color: var(--error-red);
 }
 
 .piano-key .cent-diff.flat {
-  color: #4444ff;
+  color: var(--info-blue);
 }
 
 .piano-key .detune-indicator {
@@ -484,9 +555,43 @@ audio::-webkit-media-controls-volume-slider {
 }
 
 .piano-key.sharp {
-  border-left: 2px solid #ff4444;
+  border-left: 2px solid var(--error-red);
 }
 
 .piano-key.flat {
-  border-left: 2px solid #4444ff;
+  border-left: 2px solid var(--info-blue);
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.app-content {
+  flex: 1;
+  padding: 20px;
+  background-color: var(--bg-primary);
+}
+
+.map-page-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.map-page-wrapper h1 {
+  font-size: 2rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.map-page-wrapper p {
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+}
+
+.histogram-container {
+  width: 800px;  /* Match piano visualizer width */
 }

@@ -1,11 +1,123 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import './App.css';
+import './theme.css'; // Import theme CSS
+import { ThemeProvider } from './ThemeContext'; // Import ThemeProvider
 import PianoVisualizer from './PianoVisualizer';
 import MakamInfoModal from './MakamInfoModal';
 import PitchHistogram from './PitchHistogram';
+import MapPage from './MapPage';
+import GeoMap from './GeoMap';
+import CountryPage from './CountryPage';
+import NavBar from './NavBar';
 import './PitchHistogram.css';
 
-function App() {
+// Country data with recording information 
+const countryData = {
+  egypt: {
+    name: 'Egypt',
+    id: 'egypt',
+    svgId: 'EG'
+  },
+  iraq: {
+    name: 'Iraq',
+    id: 'iraq',
+    svgId: 'IQ'
+  },
+  algeria: {
+    name: 'Algeria',
+    id: 'algeria',
+    svgId: 'DZ'
+  },
+  morocco: {
+    name: 'Morocco',
+    id: 'maroc',
+    svgId: 'MA'
+  },
+  tunisia: {
+    name: 'Tunisia',
+    id: 'tunisia',
+    svgId: 'TN'
+  },
+  turkey: {
+    name: 'Turkey',
+    id: 'turkey',
+    svgId: 'TR'
+  },
+  syria: {
+    name: 'Syria',
+    id: 'syria',
+    svgId: 'SY'
+  }
+};
+
+// Hardcoded data for the recordings we know exist
+const availableRecordings = [
+  {
+    path: "CD 1/17. Gazelle du désert",
+    title: "Gazelle du désert",
+    mode: "rast",
+    artist: "Ensemble Al-Kindi",
+    region: "syria"
+  },
+  {
+    path: "CD 1/18. Il apparut et, dans sa main",
+    title: "Il apparut et, dans sa main",
+    mode: "rast",
+    artist: "Ensemble Al-Kindi",
+    region: "syria"
+  },
+  {
+    path: "CD 2/11. Si léchanson",
+    title: "Si léchanson",
+    mode: "husayni",
+    artist: "Ensemble Al-Kindi",
+    region: "egypt"
+  },
+  {
+    path: "CD 2/12. Dis à celui dont tout le monde aime les vertus",
+    title: "Dis à celui dont tout le monde aime les vertus",
+    mode: "husayni",
+    artist: "Ensemble Al-Kindi",
+    region: "egypt"
+  },
+  {
+    path: "CD 11/02. Suite",
+    title: "Suite (CD 11/02)",
+    mode: "rast",
+    artist: "Ottoman Ensemble",
+    region: "turkey"
+  },
+  {
+    path: "CD 11/03. Suite",
+    title: "Suite (CD 11/03)",
+    mode: "rast", 
+    artist: "Ottoman Ensemble",
+    region: "turkey"
+  },
+  {
+    path: "CD 13/05. Ensemble of Muhammad al-Qubbânjî and Azzûrî al-Awwâd - Cest comme si midi était la nuit",
+    title: "Cest comme si midi était la nuit",
+    mode: "husayni",
+    artist: "Ensemble of Muhammad al-Qubbânjî and Azzûrî al-Awwâd",
+    region: "iraq"
+  },
+  {
+    path: "CD 13/07. Ensemble of Muhammad al-Qubbânjî and Azzûrî al-Awwâd - Suite",
+    title: "Suite",
+    mode: "husayni",
+    artist: "Ensemble of Muhammad al-Qubbânjî and Azzûrî al-Awwâd",
+    region: "iraq"
+  }
+];
+
+// Wrap MainApp with useLocation
+function MainAppWrapper() {
+  const location = useLocation();
+  return <MainApp location={location} />;
+}
+
+function MainApp({ location }) {
   const audioRef = useRef(null);
   const [pitchData, setPitchData] = useState(null);
   const [audioUrl, setAudioUrl] = useState(null);
@@ -20,24 +132,32 @@ function App() {
 
   const infoButtonRef = useRef(null);
 
-  // List of recordings that have pickle files
-  const availableRecordings = [
-    { cd: "CD 1", title: "17. Gazelle du désert", mode: "rast" },
-    { cd: "CD 1", title: "18. Il apparut et, dans sa main", mode: "rast" },
-    { cd: "CD 2", title: "11. Si léchanson", mode: "husayni" },
-    { cd: "CD 2", title: "12. Dis à celui dont tout le monde aime les vertus", mode: "husayni" },
-    { cd: "CD 11", title: "02. Suite", mode: "rast" },
-    { cd: "CD 11", title: "03. Suite", mode: "rast" },
-    { cd: "CD 13", title: "05. Ensemble of Muhammad al-Qubbânjî and Azzûrî al-Awwâd - Cest comme si midi était la nuit", mode: "husayni" },
-    { cd: "CD 13", title: "07. Ensemble of Muhammad al-Qubbânjî and Azzûrî al-Awwâd - Suite", mode: "husayni" }
-  ];
-
   // Map of pitch method names to display names
   const pitchMethodNames = {
     'pitch_pyin': 'pYIN',
     'pitch_makam': 'Makam',
     'pitch_crepe': 'CREPE'
   };
+
+  // Check for recording from navigation state (from country page)
+  useEffect(() => {
+    if (location && location.state && location.state.selectedRecording) {
+      const recordingPath = location.state.selectedRecording;
+      
+      // Find the recording in availableRecordings
+      const recording = availableRecordings.find(rec => rec.path === recordingPath);
+      
+      if (recording) {
+        // Set the makam first, which will populate the recordings dropdown
+        setSelectedMakam(recording.mode);
+        
+        // Then set the selected recording after a small delay to ensure the recordings have been filtered
+        setTimeout(() => {
+          setSelectedRecording(recordingPath);
+        }, 100);
+      }
+    }
+  }, [location]);
 
   useEffect(() => {
     // Get unique makams from available recordings
@@ -64,26 +184,29 @@ function App() {
   useEffect(() => {
     if (selectedRecording) {
       const recording = availableRecordings.find(rec => 
-        rec.cd + '/' + rec.title === selectedRecording
+        rec.path === selectedRecording
       );
       
       if (recording) {
         console.log('Loading data for recording:', recording);
         // Set audio URL
-        setAudioUrl(`/subsetRecordings/${recording.cd}/${recording.title}.mp3`);
+        setAudioUrl(`/subsetRecordings/${recording.path}.mp3`);
         
         // Load pitch data from JSON file
-        fetch(`/subsetRecordings/${recording.cd}/${recording.title}.json`)
+        fetch(`/subsetRecordings/${recording.path}.json`)
           .then(response => response.json())
           .then(data => {
-            // Get available pitch methods
-            const methods = Object.keys(data).filter(key => key.startsWith('pitch_'));
-            console.log('Available pitch methods:', methods);
-            setPitchMethods(methods);
+            // Get available pitch methods - filter to only include the three main methods
+            const allMethods = Object.keys(data).filter(key => key.startsWith('pitch_'));
+            const validMethods = allMethods.filter(method => 
+              ['pitch_pyin', 'pitch_crepe', 'pitch_makam'].includes(method)
+            );
+            console.log('Available pitch methods:', validMethods);
+            setPitchMethods(validMethods);
             
             // Select first method by default
-            if (methods.length > 0) {
-              const firstMethod = methods[0];
+            if (validMethods.length > 0) {
+              const firstMethod = validMethods[0];
               setSelectedPitchMethod(firstMethod);
               
               // Transform the pitch data
@@ -130,16 +253,28 @@ function App() {
   useEffect(() => {
     if (selectedRecording && selectedPitchMethod) {
       const recording = availableRecordings.find(rec => 
-        rec.cd + '/' + rec.title === selectedRecording
+        rec.path === selectedRecording
       );
       
       if (recording) {
         // Load JSON data
-        fetch(`/subsetRecordings/${recording.cd}/${recording.title}.json`)
+        fetch(`/subsetRecordings/${recording.path}.json`)
           .then(response => response.json())
           .then(data => {
             console.log('Loaded data:', data);
             console.log('Maxima locations from JSON:', data.maxima_locs_cent);
+            
+            // Check if selectedPitchMethod is valid
+            if (!['pitch_pyin', 'pitch_crepe', 'pitch_makam'].includes(selectedPitchMethod)) {
+              // If not valid, try to set a valid one
+              const validMethods = Object.keys(data).filter(key => 
+                ['pitch_pyin', 'pitch_crepe', 'pitch_makam'].includes(key)
+              );
+              if (validMethods.length > 0) {
+                setSelectedPitchMethod(validMethods[0]);
+                return; // will trigger this effect again with the valid method
+              }
+            }
             
             // Transform the pitch data
             const formattedPitchData = data[selectedPitchMethod].map(([time, frequency]) => ({
@@ -205,6 +340,10 @@ function App() {
 
   return (
     <div className="App">
+      <div className="app-header">
+        <h1>Makam Explorer</h1>
+        <Link to="/map" className="map-link">Map Explorer</Link>
+      </div>
       <div className="controls">
         <div className="select-group">
           <div className="select-container">
@@ -234,8 +373,8 @@ function App() {
               <option value="">Select a recording</option>
               {recordings.map(recording => (
                 <option 
-                  key={recording.cd + '/' + recording.title} 
-                  value={recording.cd + '/' + recording.title}
+                  key={recording.path} 
+                  value={recording.path}
                 >
                   {recording.title}
                 </option>
@@ -257,45 +396,43 @@ function App() {
 
       {audioUrl && pitchData?.pitchPoints && Array.isArray(pitchData.pitchPoints) && (
         <div className="visualization">
-          <div className="visualization-controls">
-            <div className="controls-row">
-              <audio ref={audioRef} controls src={audioUrl} />
-            </div>
-            <div className="controls-row controls-row-split">
-              <div className="speed-control">
-                <label htmlFor="speed-control">Playback speed</label>
-                <div className="speed-control-input">
-                  <input
-                    type="range"
-                    id="speed-control"
-                    min="0.25"
-                    max="2"
-                    step="0.25"
-                    value={playbackSpeed}
-                    onChange={handleSpeedChange}
-                  />
-                  <span className="speed-value">{playbackSpeed}x</span>
+          <div className="visualization-content">
+            <div className="player-controls-container">
+              <audio ref={audioRef} controls src={audioUrl} className="audio-player" />
+              <div className="playback-controls">
+                <div className="speed-control">
+                  <label htmlFor="speed-control">Playback speed</label>
+                  <div className="speed-control-input">
+                    <input
+                      type="range"
+                      id="speed-control"
+                      min="0.25"
+                      max="2"
+                      step="0.25"
+                      value={playbackSpeed}
+                      onChange={handleSpeedChange}
+                    />
+                    <span className="speed-value">{playbackSpeed}x</span>
+                  </div>
+                </div>
+                <div className="select-container pitch-method-select">
+                  <label htmlFor="pitch-method-select">Pitch extraction method</label>
+                  <select
+                    id="pitch-method-select"
+                    value={selectedPitchMethod}
+                    onChange={handlePitchMethodChange}
+                    disabled={!selectedRecording || pitchMethods.length === 0}
+                  >
+                    <option value="">Select method</option>
+                    {pitchMethods.map(method => (
+                      <option key={method} value={method}>
+                        {pitchMethodNames[method] || method}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
-              <div className="select-container pitch-method-select">
-                <label htmlFor="pitch-method-select">Pitch extraction method</label>
-                <select
-                  id="pitch-method-select"
-                  value={selectedPitchMethod}
-                  onChange={handlePitchMethodChange}
-                  disabled={!selectedRecording || pitchMethods.length === 0}
-                >
-                  <option value="">Select method</option>
-                  {pitchMethods.map(method => (
-                    <option key={method} value={method}>
-                      {pitchMethodNames[method] || method}
-                    </option>
-                  ))}
-                </select>
-              </div>
             </div>
-          </div>
-          <div className="visualization-content">
             <PianoVisualizer 
               pitchData={{
                 pitchPoints: pitchData.pitchPoints,
@@ -323,6 +460,51 @@ function App() {
         />
       )}
     </div>
+  );
+}
+
+function MapPageWrapper() {
+  return (
+    <div className="map-page-wrapper">
+      <h1>Makam Explorer - Geography</h1>
+      <p>Explore musical traditions by region. Click on a country to discover recordings from that region.</p>
+      <GeoMap availableRecordings={availableRecordings} />
+    </div>
+  );
+}
+
+function CountryPageWrapper() {
+  const navigate = useNavigate();
+  const [selectedRecording, setSelectedRecording] = useState(null);
+  
+  const handleRecordingSelect = (recording) => {
+    setSelectedRecording(recording);
+  };
+  
+  return (
+    <CountryPage 
+      availableRecordings={availableRecordings} 
+      onSelectRecording={handleRecordingSelect}
+    />
+  );
+}
+
+function App() {
+  return (
+    <ThemeProvider>
+      <Router>
+        <div className="app-container">
+          <NavBar />
+          <div className="app-content">
+            <Routes>
+              <Route path="/" element={<MainAppWrapper />} />
+              <Route path="/map" element={<MapPageWrapper />} />
+              <Route path="/country/:countryId" element={<CountryPageWrapper />} />
+            </Routes>
+          </div>
+        </div>
+      </Router>
+    </ThemeProvider>
   );
 }
 
