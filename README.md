@@ -1,8 +1,6 @@
-# 🎵 Makam Explorer
+# Makam Explorer
 
 An interactive web application for exploring and visualizing Makam music recordings from the historic **1932 Cairo Congress of Arab Music**. This tool provides real-time pitch visualization, interactive piano display, and comprehensive analysis of traditional Arab music modes.
-
-![Makam Explorer Demo](https://img.shields.io/badge/Demo-Live-brightgreen) ![License](https://img.shields.io/badge/License-MIT-blue) ![React](https://img.shields.io/badge/React-18.0-blue) ![Python](https://img.shields.io/badge/Python-3.8+-green)
 
 ## Features
 
