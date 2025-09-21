@@ -60,8 +60,10 @@ wheels/
 *.csv
 *.pickle
 
-# Large data files
-/public/subsetRecordings/**/*.json
-/public/subsetRecordings/subset_recordings_pickle/
+# Large data files and directories
+/data/cairo-congress-1932-features/
+/public/data/cairo-congress-1932/
+/public/samples/
 *.h.jpeg
 *.p.jpeg
+*.pickle

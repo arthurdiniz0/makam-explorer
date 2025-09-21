@@ -1,155 +1,112 @@
-# Makam Explorer
+# 🎵 Makam Explorer
 
-An interactive web application for exploring and visualizing Makam music recordings. This tool provides real-time pitch visualization, interactive piano display, and pitch histogram analysis for understanding the melodic characteristics of Makam music.
+An interactive web application for exploring and visualizing Makam music recordings from the historic **1932 Cairo Congress of Arab Music**. This tool provides real-time pitch visualization, interactive piano display, and comprehensive analysis of traditional Arab music modes.
+
+![Makam Explorer Demo](https://img.shields.io/badge/Demo-Live-brightgreen) ![License](https://img.shields.io/badge/License-MIT-blue) ![React](https://img.shields.io/badge/React-18.0-blue) ![Python](https://img.shields.io/badge/Python-3.8+-green)
 
 ## Features
 
-- Real-time pitch visualization with piano roll display
-- Interactive piano keyboard with playable keys (mouse and keyboard input)
-- Pitch histogram analysis showing note distribution
-- Multiple pitch detection methods (pYIN, CREPE, Makam-specific)
-- Adjustable playback speed
-- Detailed Makam information modal
-- Support for multiple recordings and Makam modes
+### **Interactive Music Analysis**
+- **Real-time pitch visualization** with piano roll display
+- **Interactive piano keyboard** with playable keys (mouse and keyboard input)
+- **Multiple pitch detection methods** (pYIN, CREPE, Makam-specific)
+- **Pitch histogram analysis** showing note distribution patterns
+- **Adjustable playback speed** for detailed analysis
 
-## Getting Started
+### **Historic 1932 Cairo Congress Dataset**
+- **333 historic recordings** across 18 CDs
+- **Multiple makam modes**: rast, bayati, hijaz, husayni, saba, and more
+- **Comprehensive metadata** with artists, regions, and performance details
+- **Tonic-aligned histograms** for accurate cross-regional comparison
 
-### Prerequisites
+## **Quick Start**
 
-- Node.js (v14 or higher)
-- npm (v6 or higher)
-- Python 3.7+ (for data processing scripts)
+### **Prerequisites**
+- Node.js 14+ and npm 6+
+- Python 3.8+ (for data processing)
+- ~3GB free space for dataset
 
-### Installation
-
-1. Clone the repository:
+### **1. Clone Repository**
 ```bash
 git clone https://github.com/yourusername/makam-explorer.git
 cd makam-explorer
 ```
 
-2. Install dependencies:
+### **2. Install Dependencies**
 ```bash
+# Install Node.js dependencies
 npm install
+
+# Install Python dependencies
+pip install -r requirements.txt
 ```
 
-3. Download required data files:
-   
-   a. **Audio recordings** from Archive.org:
-      - Visit [https://archive.org/details/13.PsaumeDeLaTristesse](https://archive.org/details/13.PsaumeDeLaTristesse)
-      - Download the VBR MP3 compressed file: [Direct Link](https://archive.org/compress/13.PsaumeDeLaTristesse/formats=VBR%20MP3&file=/13.PsaumeDeLaTristesse.zip)
-      - Extract the downloaded ZIP file
-      - Move all MP3 files to the `public/subsetRecordings` directory:
-      ```bash
-      # Create directory if it doesn't exist
-      mkdir -p public/subsetRecordings
-      
-      # Move downloaded MP3 files to the correct location
-      # Replace [DOWNLOAD_PATH] with your download location
-      mv [DOWNLOAD_PATH]/*.mp3 public/subsetRecordings/
-      ```
+### **3. Download Dataset** 
+**Important**: The dataset is NOT included in this repository due to size (~3GB)
 
-   b. **Pitch data files** from Zenodo:
-      - Visit the Zenodo repository (link will be provided later)
-      - Download the pickle files collection
-      - Extract the downloaded files to a temporary directory
-      - Process these files using the conversion script:
-      ```bash
-      # Process pickle files to generate JSON data
-      python convert_pickles.py --input_dir [PATH_TO_EXTRACTED_PICKLES] --output_dir public/pitch_data
-      ```
+**Download from official sources:**
 
-4. Verify data installation:
+1. **Analysis Data**: [Zenodo - ORD-CC32 Dataset](https://zenodo.org/records/15682346) (355.7 MB)
+2. **Audio Files**: [Internet Archive - Cairo Congress Audio](https://archive.org/details/13.PsaumeDeLaTristesse) (~2.5 GB)
+
+See **[DATASET_SETUP.md](DATASET_SETUP.md)** for detailed download and setup instructions.
+
+**Quick summary:**
+1. Download both the Zenodo analysis data and Internet Archive audio
+2. Extract files to your local machine
+3. Run the setup script to organize the data
+4. Convert analysis files to web format
+
+### **4. Run Setup Script**
 ```bash
-# Check if data files exist in correct locations
-python check_json.py
+# After downloading the dataset, run:
+chmod +x setup.sh
+./setup.sh
 ```
 
-5. Start the development server:
+### **5. Start Application**
 ```bash
 npm start
 ```
 
-The application will be available at `http://localhost:3000`.
+Visit `http://localhost:3000` to explore the Makam recordings!
 
-## Complete Setup Script
+## **Project Structure**
 
-For convenience, here's a shell script that automates the setup process after you've downloaded the required files:
-
-```bash
-#!/bin/bash
-
-# Create required directories
-mkdir -p public/subsetRecordings
-mkdir -p public/pitch_data
-
-# Check for downloads and prompt if they don't exist
-if [ -z "$(ls -A [DOWNLOAD_PATH]/mp3)" ]; then
-  echo "MP3 files not found!"
-  echo "Please download from: https://archive.org/compress/13.PsaumeDeLaTristesse/formats=VBR%20MP3"
-  exit 1
-fi
-
-if [ -z "$(ls -A [DOWNLOAD_PATH]/pickles)" ]; then
-  echo "Pickle files not found!"
-  echo "Please download from: [ZENODO_LINK]"
-  exit 1
-fi
-
-# Copy MP3 files to the correct location
-cp [DOWNLOAD_PATH]/mp3/*.mp3 public/subsetRecordings/
-
-# Process pickle files
-python convert_pickles.py --input_dir [DOWNLOAD_PATH]/pickles --output_dir public/pitch_data
-
-# Verify installation
-python check_json.py
-
-echo "Setup complete! Run 'npm start' to launch the application."
+```
+makam-explorer/
+├── src/                             # React application source
+├── public/                          # Web-accessible files
+│   ├── data/cairo-congress-1932/    # Cairo Congress dataset
+│   │   ├── metadata/               # Recording metadata (CSV)
+│   │   ├── audio/                  # Audio recordings by CD
+│   │   ├── analysis/               # Pitch data (JSON) by CD
+│   │   └── histograms/             # Pitch analysis visualizations
+│   └── samples/                    # Instrument samples (auto-downloaded)
+├── data/                           # Raw analysis dataset (not in git)
+│   └── cairo-congress-1932-features/  # Original pickle files for processing
+├── analysis/scripts/               # Data processing tools
+├── scripts/                        # Utility scripts
+├── DATASET_SETUP.md               # Dataset download guide
+└── requirements.txt               # Python dependencies
 ```
 
-Save this as `setup.sh` in the project root directory and run it after downloading the required files.
+## **Usage Guide**
 
-## Usage
+### **Basic Exploration**
+1. **Select a makam mode** from the dropdown (e.g., "rast", "bayati")
+2. **Choose a recording** from the filtered list
+3. **Play audio** and watch real-time pitch visualization
+4. **Click piano keys** to hear the makam intervals
+5. **Switch pitch methods** to compare analysis algorithms
 
-1. Select a Makam from the dropdown menu
-2. Choose a recording to analyze
-3. Use the audio controls to play/pause and adjust playback speed
-4. Select different pitch detection methods to compare analyses
-5. Click the "About Makam" button to learn more about the selected Makam
-6. Interact with the piano visualization using mouse or keyboard
+### **Features**
+- **Keyboard shortcuts**: Use QWERTY keys to play piano
+- **Speed control**: Adjust playback speed for detailed analysis
+- **Instrument switching**: Toggle between flute and guitar sounds
+- **Makam information**: Click "About Makam" for theoretical details
+- **Regional comparison**: Compare the same makam across different regions
 
-## Data Processing
+##**License & Citation**
 
-The application uses preprocessed pitch data from audio recordings. To process new or additional recordings:
-
-1. Place audio files in the `public/subsetRecordings` directory
-2. If you have new pickle files with pitch data, run the conversion script:
-```bash
-python convert_pickles.py --input_dir [PATH_TO_PICKLES] --output_dir public/pitch_data
-```
-
-## Common Issues and Troubleshooting
-
-- **Missing audio files**: Ensure all MP3 files are properly placed in `public/subsetRecordings`
-- **Missing pitch data**: Verify that the pickle conversion was successful and that JSON files exist in `public/pitch_data`
-- **Playback issues**: Check browser console for errors. Some browsers may have restrictions on AudioContext initialization
-
-## Technologies Used
-
-- React.js
-- D3.js for data visualization
-- Web Audio API for sound synthesis
-- Python for data processing
-- Tone.js for audio synthesis and sample management
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-- MakamWorld for providing Makam reference information
-- Original audio recordings and their performers
-- Research papers and tools for pitch detection algorithms
-- Internet Archive for hosting the audio recordings
+This project is licensed under the **MIT License**.

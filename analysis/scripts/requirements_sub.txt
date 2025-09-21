@@ -1,0 +1,12 @@
+audioread==3.0.1
+crepe==0.0.15
+essentia==2.1b6.dev1177
+librosa==0.10.2.post1
+matplotlib==3.9.0
+musicbrainzngs==0.7.1
+mutagen==1.47.0
+predominantmelodymakam @ git+https://github.com/sertansenturk/predominantmelodymakam.git@4356e9659154371a426fb8e5bd1e50979eed4a40
+requests==2.32.3
+resampy==0.2.2
+sounddevice==0.5.0
+soundfile==0.12.1

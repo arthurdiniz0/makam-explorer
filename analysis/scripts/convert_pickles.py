@@ -92,9 +92,9 @@ def process_directory(input_dir, output_dir):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Convert pickle files to JSON for Makam Explorer')
-    parser.add_argument('--input_dir', type=str, default="public/subsetRecordings/subset_recordings_pickle",
+    parser.add_argument('--input_dir', type=str, default="data/cairo-congress-1932-features",
                         help='Input directory containing pickle files')
-    parser.add_argument('--output_dir', type=str, default="public/pitch_data",
+    parser.add_argument('--output_dir', type=str, default="public/data/cairo-congress-1932/analysis",
                         help='Output directory for JSON files')
     
     args = parser.parse_args()

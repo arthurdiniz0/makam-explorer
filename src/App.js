@@ -20,17 +20,8 @@ function App() {
 
   const infoButtonRef = useRef(null);
 
-  // List of recordings that have pickle files
-  const availableRecordings = [
-    { cd: "CD 1", title: "17. Gazelle du désert", mode: "rast" },
-    { cd: "CD 1", title: "18. Il apparut et, dans sa main", mode: "rast" },
-    { cd: "CD 2", title: "11. Si léchanson", mode: "husayni" },
-    { cd: "CD 2", title: "12. Dis à celui dont tout le monde aime les vertus", mode: "husayni" },
-    { cd: "CD 11", title: "02. Suite", mode: "rast" },
-    { cd: "CD 11", title: "03. Suite", mode: "rast" },
-    { cd: "CD 13", title: "05. Ensemble of Muhammad al-Qubbânjî and Azzûrî al-Awwâd - Cest comme si midi était la nuit", mode: "husayni" },
-    { cd: "CD 13", title: "07. Ensemble of Muhammad al-Qubbânjî and Azzûrî al-Awwâd - Suite", mode: "husayni" }
-  ];
+  // State for available recordings (loaded from CSV)
+  const [availableRecordings, setAvailableRecordings] = useState([]);
 
   // Map of pitch method names to display names
   const pitchMethodNames = {
@@ -39,15 +30,92 @@ function App() {
     'pitch_crepe': 'CREPE'
   };
 
+  // Load recordings from CSV metadata
   useEffect(() => {
-    // Get unique makams from available recordings
-    const uniqueMakams = [...new Set(availableRecordings.map(rec => rec.mode))];
-    console.log('Available makams:', uniqueMakams);
-    setMakams(uniqueMakams);
+    const loadRecordings = async () => {
+      try {
+        const response = await fetch('/data/cairo-congress-1932/metadata/allfiles_metadata.csv');
+        const csvText = await response.text();
+        
+        // Parse CSV
+        const lines = csvText.split('\n');
+        const headers = lines[0].split(',');
+        const recordings = [];
+        
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (!line) continue;
+          
+          // Parse CSV line (handling quoted fields)
+          const values = [];
+          let current = '';
+          let inQuotes = false;
+          
+          for (let j = 0; j < line.length; j++) {
+            const char = line[j];
+            if (char === '"') {
+              inQuotes = !inQuotes;
+            } else if (char === ',' && !inQuotes) {
+              values.push(current);
+              current = '';
+            } else {
+              current += char;
+            }
+          }
+          values.push(current); // Add last value
+          
+          if (values.length >= 5) {
+            const path = values[0];
+            const mode = values[4];
+            const artist = values[8];
+            const region = values[9];
+            
+            // Parse CD and title from path
+            const pathMatch = path.match(/^(CD \d+)\/(.+)$/);
+            if (pathMatch) {
+              const cd = pathMatch[1];
+              const title = pathMatch[2];
+              
+              recordings.push({
+                cd,
+                title,
+                mode,
+                artist,
+                region,
+                path,
+                fullTitle: `${title} (${artist} - ${region})`
+              });
+            }
+          }
+        }
+        
+        console.log('Loaded recordings:', recordings.length);
+        setAvailableRecordings(recordings);
+        
+        // Get unique makams
+        const uniqueMakams = [...new Set(recordings.map(rec => rec.mode))];
+        console.log('Available makams:', uniqueMakams);
+        setMakams(uniqueMakams);
+        setSelectedMakam(uniqueMakams[0] || '');
+        
+      } catch (error) {
+        console.error('Error loading recordings:', error);
+        // Fallback to original hardcoded list
+        const fallbackRecordings = [
+          { cd: "CD 1", title: "17. Gazelle du désert", mode: "rast", artist: "Darwîsh Muhammad al-Harîrî", region: "Egypt" },
+          { cd: "CD 1", title: "18. Il apparut et, dans sa main", mode: "rast", artist: "Darwîsh Muhammad al-Harîrî", region: "Egypt" }
+        ];
+        setAvailableRecordings(fallbackRecordings);
+        setMakams(['rast']);
+        setSelectedMakam('rast');
+      }
+    };
+    
+    loadRecordings();
   }, []);
 
   useEffect(() => {
-    if (selectedMakam) {
+    if (selectedMakam && availableRecordings.length > 0) {
       // Filter recordings by selected makam
       const filteredRecordings = availableRecordings.filter(rec => rec.mode === selectedMakam);
       console.log('Filtered recordings for makam', selectedMakam, ':', filteredRecordings);
@@ -59,7 +127,7 @@ function App() {
       setSelectedRecording('');
       setSelectedPitchMethod('');
     }
-  }, [selectedMakam]);
+  }, [selectedMakam, availableRecordings]);
 
   useEffect(() => {
     if (selectedRecording) {
@@ -70,10 +138,10 @@ function App() {
       if (recording) {
         console.log('Loading data for recording:', recording);
         // Set audio URL
-        setAudioUrl(`/subsetRecordings/${recording.cd}/${recording.title}.mp3`);
+        setAudioUrl(`/data/cairo-congress-1932/audio/${recording.cd}/${recording.title}.mp3`);
         
         // Load pitch data from JSON file
-        fetch(`/subsetRecordings/${recording.cd}/${recording.title}.json`)
+        fetch(`/data/cairo-congress-1932/analysis/${recording.cd}/${recording.title}.json`)
           .then(response => response.json())
           .then(data => {
             // Get available pitch methods
@@ -113,7 +181,9 @@ function App() {
             }
           })
           .catch(error => {
-            console.error('Error loading data:', error);
+            console.error('Error loading pitch data:', error);
+            console.warn(`No pitch data file found for: ${recording.cd}/${recording.title}.json`);
+            console.info('To add pitch data for this recording, create a JSON file with pitch analysis data in the /public/data/cairo-congress-1932/analysis/ directory');
             setPitchData(null);
             setPitchMethods([]);
             setSelectedPitchMethod('');
@@ -135,8 +205,13 @@ function App() {
       
       if (recording) {
         // Load JSON data
-        fetch(`/subsetRecordings/${recording.cd}/${recording.title}.json`)
-          .then(response => response.json())
+        fetch(`/data/cairo-congress-1932/analysis/${recording.cd}/${recording.title}.json`)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+          })
           .then(data => {
             console.log('Loaded data:', data);
             console.log('Maxima locations from JSON:', data.maxima_locs_cent);
@@ -173,7 +248,7 @@ function App() {
             });
           })
           .catch(error => {
-            console.error('Error loading data:', error);
+            console.error('Error loading pitch data for visualization:', error);
             setPitchData(null);
           });
       }
@@ -237,7 +312,7 @@ function App() {
                   key={recording.cd + '/' + recording.title} 
                   value={recording.cd + '/' + recording.title}
                 >
-                  {recording.title}
+                  {recording.fullTitle || `${recording.title} (${recording.artist} - ${recording.region})`}
                 </option>
               ))}
             </select>

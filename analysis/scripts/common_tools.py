@@ -3,7 +3,7 @@
 """
 Created on Fri Jul  5 14:35:06 2024
 
-Collection of common functions
+Collection of common tools/functions
 
 @author: barisbozkurt
 """
@@ -80,7 +80,7 @@ def get_file_list(dataFolder, extension='.mp3'):
                 file_list.append(file_name)
     return file_list
 
-def warp_hist_in_1_octave(hist_series, num_notes_in_octave):
+def warp_hist_in_1_octave(hist_series, num_notes_in_octave, ref_0_cents_ind=None):
     '''
     Warps given histogram in a single octave. hist_series is assumed to
     be represent an octave with num_notes_in_octave points. 
@@ -91,6 +91,7 @@ def warp_hist_in_1_octave(hist_series, num_notes_in_octave):
         Pitch histogram spanning several octaves.
     num_notes_in_octave : int
         Number of notes in an octave.
+    ref_0_cents_ind: index of reference point for computing a 1-octave histogram
 
     Returns
     -------
@@ -100,7 +101,13 @@ def warp_hist_in_1_octave(hist_series, num_notes_in_octave):
     '''
     oct_warped_hist = np.zeros((num_notes_in_octave,))
     for i in range(hist_series.size):
-        oct_warped_hist[i%num_notes_in_octave] += hist_series[i]
+        if ref_0_cents_ind: # shift i if ref_0_cents_ind exists
+            target_i = i - ref_0_cents_ind
+            while target_i < CENTS_IN_OCTAVE:
+                target_i += CENTS_IN_OCTAVE
+            oct_warped_hist[target_i%num_notes_in_octave] += hist_series[i]
+        else:
+            oct_warped_hist[i%num_notes_in_octave] += hist_series[i]
     return oct_warped_hist
 
 def plot_hist(pickle_file, jpeg_file, methods):
@@ -128,35 +135,50 @@ def plot_hist(pickle_file, jpeg_file, methods):
 
     plt.figure(figsize=(12,8))
     plt.subplot(2,1,1)
-    colors = ['r','g','b','c']
-    for c, method in zip(colors, methods):
-        plt.plot(file_info['pitch_hist_edges'], file_info['pitch_hist_values_'+method], c, label=method)
-    plt.plot(file_info['pitch_hist_edges'], file_info['pitch_hist_values_mean'], 'k', linewidth=2.5, label='mean')
+    colors = ['r','g','b','k']
+    for c, method in zip(colors, methods+['mean']):
+        if method=='mean':
+            linewidth = 2.5
+        else:
+            linewidth = 1
+        plt.plot(file_info['pitch_hist_edges'], file_info['pitch_hist_values_'+method], c, linewidth=linewidth, label=method)
+    
+    mean_hist = file_info['pitch_hist_values_mean']
+    # Count zeros on both sides
+    left_zeros = np.argmax(mean_hist != 0)
+    right_zeros = np.argmax(mean_hist[::-1] != 0)
+    # set x-limits
+    x_left_lim = file_info['pitch_hist_edges'][left_zeros] 
+    x_right_lim = file_info['pitch_hist_edges'][len(mean_hist)-right_zeros] 
+
     plt.grid(True)
     plt.legend(loc='upper right')
+    plt.xlabel('Cents wrt to ref-freq: 55Hz')
+    plt.ylabel('Num. of Occurences')
+    plt.xlim(x_left_lim, x_right_lim)
 
     plt.subplot(2,1,2)
     edges_1_oct = np.arange(0, CENTS_IN_OCTAVE, CENTS_IN_OCTAVE/num_notes_in_octave)
     for c, method in zip(colors, methods):
         oct_warped_hist = warp_hist_in_1_octave(file_info['pitch_hist_values_'+method], num_notes_in_octave)
         plt.plot(edges_1_oct, oct_warped_hist, c, label=method)
-    
-    oct_warped_hist = warp_hist_in_1_octave(file_info['pitch_hist_values_mean'], num_notes_in_octave)
-    plt.plot(edges_1_oct, oct_warped_hist, 'k', linewidth=2.5, label='mean')
+        
+    oct_warped_hist_mean = file_info['oct_warped_hist_mean']
+    plt.plot(edges_1_oct, oct_warped_hist_mean, 'k', linewidth=2.5, label='mean')
     
     # plot peaks and intervals
     maxima_positions = file_info['maxima_locs_cent'] 
              
 
     # Plot vertical lines at maxima locations and add text for index values
-    y_max = np.max(oct_warped_hist)
+    y_max = np.max(oct_warped_hist_mean)
     for x_max in maxima_positions:
         plt.axvline(x=x_max, color='k', linestyle='--')
         # Add text at the maximum position
         plt.text(x_max+5, y_max, f'{x_max:.2f}', color='black', ha='left', va='bottom', fontsize=12)
     
     # Calculate and plot distances between consecutive maxima
-    mid_y = (np.max(oct_warped_hist) + np.min(oct_warped_hist)) / 2
+    mid_y = (np.max(oct_warped_hist_mean) + np.min(oct_warped_hist_mean)) / 2
     # delta_y = mid_y/5
     for i in range(len(maxima_positions) - 1):
         # Calculate distance
@@ -171,10 +193,29 @@ def plot_hist(pickle_file, jpeg_file, methods):
     
     plt.grid(True)
     # plt.legend(loc='upper right')
-    plt.xlabel('Cents wrt to ref-freq:55Hz')
+    plt.xlabel('Cents wrt to ref-freq: 55Hz')
     plt.ylabel('Num. of Occurences')    
     plt.savefig(jpeg_file, dpi=100)  # dpi can be adjusted for higher quality
     plt.close()
+    
+    if 'oct_warped_hist_mean_wrt_tonic' in file_info:
+        jpeg_file = jpeg_file.replace('.jpeg','.tonic.jpeg')
+        plt.figure(figsize=(12,4))
+        
+        # plot grids
+        x_ax_major = np.arange(0,1200,100)
+        x_ax_minor = np.arange(0,1200,20)
+        plt.vlines(x_ax_minor, 0, max(file_info['oct_warped_hist_mean_wrt_tonic']), colors='g', linestyles='dashed')
+        plt.vlines(x_ax_major, 0, max(file_info['oct_warped_hist_mean_wrt_tonic']), colors='k', linestyles='solid')
+        
+        plt.plot(edges_1_oct, file_info['oct_warped_hist_mean_wrt_tonic'], 'b')#, label='tonic_aligned')
+        plt.grid(True)
+        #plt.legend(loc='upper right')
+        plt.xlabel(f"Cents wrt to tonic-freq: {file_info['tonic_pitch_hz']:.2f}Hz")
+        plt.ylabel('Num. of Occurences')    
+        plt.savefig(jpeg_file, dpi=100)  # dpi can be adjusted for higher quality
+        plt.close()
+        
 
     
 def moving_average_3_point(arr):
@@ -497,25 +538,43 @@ def update_pickle_metadata(pickle_file, track_mbid):
     with open(pickle_file, 'wb') as file:
         pickle.dump(file_info, file)        
 
-def update_tags_from_musicbrainz():
+def update_tags_from_musicbrainz(querySubStr=[]):
     '''Function to call after tags are edited in musicbrainz
-    Only updates tags'''
+    Only updates tags in the pickle files.
+    
+    To only update a subset use querySubStr and specify substrings that exist in
+    file name. 
+    Example: querySubStr=["CD 13/05.","CD 13/06.","CD 13/07."]
+    would result in updating only 3 files
+    Default value: empty list -> process all files
+    '''
     
     pickle_files_list = get_file_list(dataFolder, extension='.pickle')
-
+    print('Accessing musicBrainz to update tags')
     for i, pickle_file in enumerate(pickle_files_list):
         if i%20 == 0:
             print('Updating file index:', i, 'of', len(pickle_files_list))
         
-        with open(pickle_file, 'rb') as file:
-            file_info = pickle.load(file)
+        update_file = True
+
+        # If querySubStr is not empty, use queries to decide if file will be updated
+        if querySubStr:
+            update_file = False
+        for subStr in querySubStr:
+            if subStr in pickle_file:
+                update_file = True
+
+        if update_file:
         
-        # update tags
-        file_info['mb_tags'] = get_recording_tags(file_info['mbid'])
-        
-        # Save extended content to the pickle file
-        with open(pickle_file, 'wb') as file:
-            pickle.dump(file_info, file)
+            with open(pickle_file, 'rb') as file:
+                file_info = pickle.load(file)
+            
+            # update tags
+            file_info['mb_tags'] = get_recording_tags(file_info['mbid'])
+            
+            # Save extended content to the pickle file
+            with open(pickle_file, 'wb') as file:
+                pickle.dump(file_info, file)
         
 
 def update_id3_tags(file_path, metadata):
@@ -588,9 +647,44 @@ def convert_tags_to_dict(tags):
         
     return tag_dict
 
+
+def create_count_tables(dataFolder, df):
+    '''
+    Creates tables for number of recordings for each mode per region
+
+    Parameters
+    ----------
+    df : dataframe
+        Dataframe containig all metadata. Content of allfiles_metadata.csv
+
+    Returns
+    -------
+    None. Creates two csv files: region_modes_count.csv, mode_regions_count.csv
+
+    '''
+    # Create count tables
+    counts_table = (
+        df.groupby(['region', 'mode'])
+        .size()
+        .reset_index(name='count')
+        .sort_values(by=['region', 'count'], ascending=[True, False])
+    )
+
+    counts_table.to_csv(os.path.join(dataFolder,'region_modes_count.csv'))
+
+    counts_table = (
+        df.groupby(['mode', 'region'])
+        .size()
+        .reset_index(name='count')
+        .sort_values(by=['mode', 'count'], ascending=[True, False])
+    )
+
+    counts_table.to_csv(os.path.join(dataFolder,'mode_regions_count.csv'))
+
 def save_allMetadata_to_file(dataFolder='../AudioCollection/CDsWithTags/'):
     
-    columns = ['path','link','mb_trackTitle','tags','mode','vocal-only','tonic_secs','artist','region']
+    columns = ['path','link','mb_trackTitle','tags','mode','vocal-only',
+               'tonic_secs','tonic_Hz','artist','region']
     df = pd.DataFrame(columns=columns)
     
     # Get pickle files list    
@@ -608,6 +702,8 @@ def save_allMetadata_to_file(dataFolder='../AudioCollection/CDsWithTags/'):
         recording_tags_dict = convert_tags_to_dict(recording_tags)
         recording_artist, recording_region = get_recording_artist_region(file_info)
         
+        if 'tonic_secs' in recording_tags_dict:
+            pass
         row_data = {'path': recording_path, 
                     'link': 'https://musicbrainz.org/recording/'+recording_mbid, 
                     'mb_trackTitle': recording_mb_trackTitle, 
@@ -615,14 +711,23 @@ def save_allMetadata_to_file(dataFolder='../AudioCollection/CDsWithTags/'):
                     'mode': recording_tags_dict['mode'],
                     'vocal-only': ('vocal-only' in recording_tags),
                     'tonic_secs': recording_tags_dict['tonic_secs'] if 'tonic_secs' in recording_tags_dict else None,
+                    'tonic_Hz': file_info['tonic_pitch_hz'] if 'tonic_pitch_hz' in file_info else None,
                     'artist': recording_artist, 
                     'region': recording_region}
         
         df = pd.concat([df, pd.DataFrame([row_data])], ignore_index=True)
     
     df_sorted = df.sort_values(by='path')
-    df_sorted.to_csv(os.path.join(dataFolder,'allfiles_metadata.csv'), index=False)
+    df_sorted.to_csv(os.path.join(dataFolder,'allfiles_metadata.csv'), index=False, float_format='%.2f')
+    create_count_tables(dataFolder, df_sorted)
 
-        
 
-save_allMetadata_to_file()
+def update_after_tag_edit():
+    # Re-create allfiles_metadata.csv file from pickle file contents
+    files2ReProcessSubStr = [] # leave list empty to process all files
+    update_tags_from_musicbrainz(querySubStr=files2ReProcessSubStr)
+    save_allMetadata_to_file()
+
+if __name__ == "__main__":
+    # Run main function if there are updates in musicBrainz
+    update_after_tag_edit()

@@ -1,122 +1,192 @@
 #!/bin/bash
 
 # Makam Explorer Setup Script
-# This script automates the setup of the Makam Explorer application.
+# This script helps set up the Cairo Congress dataset after downloading
 
-echo "=== Makam Explorer Setup ==="
-echo "This script will help you set up the required data files for Makam Explorer."
+set -e  # Exit on any error
 
-# Check if required commands exist
-command -v npm >/dev/null 2>&1 || { echo "Error: npm is required but not installed."; exit 1; }
-command -v python3 >/dev/null 2>&1 || { echo "Error: python3 is required but not installed."; exit 1; }
+echo "🎵 Makam Explorer - Dataset Setup Script"
+echo "========================================"
+echo ""
 
-# Install npm dependencies if node_modules doesn't exist
-if [ ! -d "node_modules" ]; then
-  echo "Installing npm dependencies..."
-  npm install
-  if [ $? -ne 0 ]; then
-    echo "Error: Failed to install npm dependencies."
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Function to print colored output
+print_status() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
+
+print_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+}
+
+print_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+}
+
+print_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
+
+# Check if we're in the right directory
+if [ ! -f "package.json" ] || [ ! -d "src" ]; then
+    print_error "Please run this script from the makam-explorer root directory"
     exit 1
-  fi
-  echo "npm dependencies installed successfully."
 fi
+
+print_status "Setting up directory structure..."
 
 # Create required directories
-mkdir -p public/subsetRecordings
-mkdir -p public/pitch_data
-mkdir -p public/samples
+mkdir -p data/cairo-congress-1932-features
+mkdir -p public/data/cairo-congress-1932/metadata
+mkdir -p public/data/cairo-congress-1932/audio
+mkdir -p public/data/cairo-congress-1932/analysis
+mkdir -p public/data/cairo-congress-1932/histograms
 
-# Define download paths
-MP3_DOWNLOAD_PATH="$HOME/Downloads/13.PsaumeDeLaTristesse"
-PICKLE_DOWNLOAD_PATH="$HOME/Downloads/makam_pickles"
+print_success "Directory structure created"
 
-# Check for MP3 files
-echo -n "Have you downloaded the MP3 files from Archive.org? (y/n): "
-read mp3_downloaded
+# Check for dataset folders
+AUDIO_FOLDER=""
+FEATURES_FOLDER=""
 
-if [ "$mp3_downloaded" != "y" ]; then
-  echo "Please download MP3 files from:"
-  echo "https://archive.org/compress/13.PsaumeDeLaTristesse/formats=VBR%20MP3&file=/13.PsaumeDeLaTristesse.zip"
-  echo "Extract the files and then run this script again."
-  exit 1
+print_status "Looking for downloaded dataset folders..."
+
+# Look for audio folder
+if [ -d "Congrès de musique arabe du Caire"* ]; then
+    AUDIO_FOLDER=$(find . -maxdepth 1 -name "Congrès de musique arabe du Caire*" -type d | head -1)
+    print_success "Found audio folder: $AUDIO_FOLDER"
+elif [ -d "../Congrès de musique arabe du Caire"* ]; then
+    AUDIO_FOLDER=$(find .. -maxdepth 1 -name "Congrès de musique arabe du Caire*" -type d | head -1)
+    print_success "Found audio folder: $AUDIO_FOLDER"
+else
+    print_error "Audio folder not found!"
+    print_warning "Please download the Cairo Congress audio dataset first."
+    print_warning "See DATASET_SETUP.md for instructions."
+    exit 1
 fi
 
-# Ask for MP3 location
-echo -n "Enter the path to the MP3 files [$MP3_DOWNLOAD_PATH]: "
-read mp3_path
-mp3_path=${mp3_path:-$MP3_DOWNLOAD_PATH}
-
-if [ ! -d "$mp3_path" ]; then
-  echo "Error: Directory $mp3_path does not exist."
-  exit 1
+# Look for features folder
+if [ -d "CairoCong1932_features_plots"* ]; then
+    FEATURES_FOLDER=$(find . -maxdepth 1 -name "CairoCong1932_features_plots*" -type d | head -1)
+    print_success "Found features folder: $FEATURES_FOLDER"
+elif [ -d "../CairoCong1932_features_plots"* ]; then
+    FEATURES_FOLDER=$(find .. -maxdepth 1 -name "CairoCong1932_features_plots*" -type d | head -1)
+    print_success "Found features folder: $FEATURES_FOLDER"
+else
+    print_error "Features folder not found!"
+    print_warning "Please download the Cairo Congress features dataset first."
+    print_warning "See DATASET_SETUP.md for instructions."
+    exit 1
 fi
 
-MP3_COUNT=$(find "$mp3_path" -name "*.mp3" | wc -l)
-if [ $MP3_COUNT -eq 0 ]; then
-  echo "Error: No MP3 files found in $mp3_path."
-  echo "Please download the MP3 files and extract them."
-  exit 1
+print_status "Audio files will be copied directly to web directory..."
+# We'll copy directly to public directory below, no intermediate storage needed
+
+print_status "Copying analysis files for processing..."
+cp -r "$FEATURES_FOLDER" data/cairo-congress-1932-features
+print_success "Analysis files copied"
+
+print_status "Setting up web-accessible metadata..."
+cp data/cairo-congress-1932-features/allfiles_metadata.csv public/data/cairo-congress-1932/metadata/
+if [ -f data/cairo-congress-1932-features/mode_regions_count.csv ]; then
+    cp data/cairo-congress-1932-features/mode_regions_count.csv public/data/cairo-congress-1932/metadata/
+fi
+if [ -f data/cairo-congress-1932-features/region_modes_count.csv ]; then
+    cp data/cairo-congress-1932-features/region_modes_count.csv public/data/cairo-congress-1932/metadata/
+fi
+print_success "Metadata files copied"
+
+print_status "Copying histogram images..."
+if [ -d data/cairo-congress-1932-features/tonic_aligned_hists ]; then
+    cp -r data/cairo-congress-1932-features/tonic_aligned_hists/* public/data/cairo-congress-1932/histograms/ 2>/dev/null || true
+    print_success "Histogram images copied"
+else
+    print_warning "No histogram images found - this is optional"
 fi
 
-echo "Found $MP3_COUNT MP3 files in $mp3_path."
-
-# Check for pickle files
-echo -n "Have you downloaded the pickle files from Zenodo? (y/n): "
-read pickle_downloaded
-
-if [ "$pickle_downloaded" != "y" ]; then
-  echo "Please download pickle files from the Zenodo repository."
-  echo "The link will be provided separately."
-  echo "Extract the files and then run this script again."
-  exit 1
+# Check if Python is available
+if command -v python3 &> /dev/null; then
+    PYTHON_CMD="python3"
+elif command -v python &> /dev/null; then
+    PYTHON_CMD="python"
+else
+    print_error "Python not found! Please install Python 3.8+ to continue."
+    exit 1
 fi
 
-# Ask for pickle location
-echo -n "Enter the path to the pickle files [$PICKLE_DOWNLOAD_PATH]: "
-read pickle_path
-pickle_path=${pickle_path:-$PICKLE_DOWNLOAD_PATH}
+print_status "Converting pitch data files (.pickle to .json)..."
+cd analysis/scripts
+$PYTHON_CMD convert_pickles.py
+cd ../..
+print_success "Pitch data converted"
 
-if [ ! -d "$pickle_path" ]; then
-  echo "Error: Directory $pickle_path does not exist."
-  exit 1
+print_status "Copying audio files directly to web directory..."
+$PYTHON_CMD -c "
+import os
+import shutil
+from pathlib import Path
+
+# Use the downloaded audio folder directly
+audio_folder = Path('$AUDIO_FOLDER')
+public_audio_dir = Path('public/data/cairo-congress-1932/audio')
+
+copied_count = 0
+for cd_dir in audio_folder.glob('CD *'):
+    cd_name = cd_dir.name
+    target_dir = public_audio_dir / cd_name
+    target_dir.mkdir(parents=True, exist_ok=True)
+    
+    for mp3_file in cd_dir.glob('*.mp3'):
+        target_file = target_dir / mp3_file.name
+        if not target_file.exists():
+            shutil.copy2(mp3_file, target_file)
+            copied_count += 1
+
+print(f'Copied {copied_count} audio files successfully!')
+"
+print_success "Audio files copied to web directory"
+
+# Check if Node.js is available
+if command -v node &> /dev/null; then
+    print_status "Downloading instrument samples..."
+    node scripts/download-samples.js
+    print_success "Instrument samples downloaded"
+else
+    print_warning "Node.js not found - skipping instrument samples download"
+    print_warning "Run 'node scripts/download-samples.js' manually after installing Node.js"
 fi
 
-PICKLE_COUNT=$(find "$pickle_path" -name "*.pickle" | wc -l)
-if [ $PICKLE_COUNT -eq 0 ]; then
-  echo "Error: No pickle files found in $pickle_path."
-  echo "Please download the pickle files and extract them."
-  exit 1
-fi
+print_status "Verifying setup..."
 
-echo "Found $PICKLE_COUNT pickle files in $pickle_path."
+# Count files to verify
+AUDIO_COUNT=$(find public/subsetRecordings -name "*.mp3" 2>/dev/null | wc -l | tr -d ' ')
+JSON_COUNT=$(find public/subsetRecordings -name "*.json" 2>/dev/null | wc -l | tr -d ' ')
+SAMPLE_COUNT=$(find public/samples -name "*.mp3" 2>/dev/null | wc -l | tr -d ' ')
 
-# Copy MP3 files
-echo "Copying MP3 files to public/subsetRecordings..."
-cp -r "$mp3_path"/*.mp3 public/subsetRecordings/
-if [ $? -ne 0 ]; then
-  echo "Error: Failed to copy MP3 files."
-  exit 1
-fi
+echo ""
+echo "📊 Setup Verification:"
+echo "   Audio files: $AUDIO_COUNT (expected: 333)"
+echo "   JSON pitch files: $JSON_COUNT (expected: 333)"
+echo "   Instrument samples: $SAMPLE_COUNT (expected: 31)"
 
-# Process pickle files
-echo "Processing pickle files..."
-python3 convert_pickles.py --input_dir "$pickle_path" --output_dir public/pitch_data
-if [ $? -ne 0 ]; then
-  echo "Error: Failed to process pickle files."
-  exit 1
-fi
-
-# Verify installation
-echo "Verifying installation..."
-python3 check_json.py
-if [ $? -ne 0 ]; then
-  echo "Error: Data verification failed."
-  exit 1
+if [ "$AUDIO_COUNT" -gt 300 ] && [ "$JSON_COUNT" -gt 300 ]; then
+    print_success "Setup completed successfully!"
+    echo ""
+    echo "🚀 Ready to start!"
+    echo "   Run: npm install"
+    echo "   Then: npm start"
+    echo ""
+    echo "   The app will be available at: http://localhost:3000"
+else
+    print_warning "Setup completed with some issues"
+    print_warning "Some files may be missing - check the counts above"
+    print_warning "See DATASET_SETUP.md for troubleshooting"
 fi
 
 echo ""
-echo "=== Setup Complete! ==="
-echo "You can now start the application with:"
-echo "npm start"
-echo ""
-echo "The application will be available at http://localhost:3000" 
+print_status "Setup script completed!"
