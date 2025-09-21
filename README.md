@@ -50,7 +50,7 @@ npm install
       ```
 
    b. **Pitch data files** from Zenodo:
-      - Visit the Zenodo repository (link will be provided later)
+      - Visit the Zenodo repository: https://zenodo.org/records/15682346
       - Download the pickle files collection
       - Extract the downloaded files to a temporary directory
       - Process these files using the conversion script:
